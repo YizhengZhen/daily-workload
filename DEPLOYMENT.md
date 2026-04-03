@@ -64,8 +64,10 @@ export OPENAI_BASE_URL=https://api.deepseek.com
 ### 5. 启用 GitHub Pages
 1. 进入 GitHub 仓库 Settings → Pages
 2. 设置 Source 为 "Deploy from a branch"
-3. 设置 Branch 为 "main" 和文件夹 "/website"
+3. 设置 Branch 为 "main" 和文件夹 "/" (根目录)
 4. 点击 Save
+
+**注意**: GitHub Actions工作流会自动将`website/`目录的内容复制到根目录，所以请选择根目录"/"作为发布文件夹。
 
 ### 6. 手动测试工作流
 1. 进入 GitHub 仓库 Actions 标签页
