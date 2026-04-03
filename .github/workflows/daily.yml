@@ -1,0 +1,206 @@
+name: Daily Research Tracker
+
+on:
+  schedule:
+    # Run daily at 02:00 UTC (10:00 Beijing)
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+    # Manual trigger
+    inputs:
+      date:
+        description: 'Specific date (YYYY-MM-DD) to process (optional)'
+        required: false
+        default: ''
+      skip_ai:
+        description: 'Skip AI enhancement step'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for proper branching
+    
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -e .
+        pip install feedparser requests PyYAML langchain langchain-openai tqdm python-dateutil pydantic jinja2
+    
+    - name: Fetch RSS feeds
+      id: fetch_rss
+      run: |
+        echo "Fetching RSS feeds..."
+        python fetch_rss.py
+        
+        # Check if data file was created
+        TODAY=$(date -u "+%Y-%m-%d")
+        DATA_FILE="data/${TODAY}.jsonl"
+        
+        if [ -f "$DATA_FILE" ]; then
+          ENTRY_COUNT=$(wc -l < "$DATA_FILE")
+          echo "Fetched $ENTRY_COUNT entries"
+          echo "data_file=$DATA_FILE" >> $GITHUB_OUTPUT
+          echo "entry_count=$ENTRY_COUNT" >> $GITHUB_OUTPUT
+          echo "has_content=true" >> $GITHUB_OUTPUT
+        else
+          echo "No data file created"
+          echo "has_content=false" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: AI Enhancement
+      id: ai_enhancement
+      if: steps.fetch_rss.outputs.has_content == 'true' && github.event.inputs.skip_ai != 'true'
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+      run: |
+        echo "Running AI enhancement..."
+        TODAY=$(date -u "+%Y-%m-%d")
+        DATA_FILE="data/${TODAY}.jsonl"
+        
+        if [ -f "$DATA_FILE" ]; then
+          python enhance.py --data "$DATA_FILE"
+          
+          # Check if enhanced file was created
+          ENHANCED_FILE="data/${TODAY}_AI_enhanced_English.jsonl"
+          if [ -f "$ENHANCED_FILE" ]; then
+            echo "AI enhancement completed"
+            echo "enhanced_file=$ENHANCED_FILE" >> $GITHUB_OUTPUT
+          else
+            echo "Warning: Enhanced file not created"
+            echo "enhanced_file=" >> $GITHUB_OUTPUT
+          fi
+        else
+          echo "Error: Input data file not found"
+          exit 1
+        fi
+    
+    - name: Generate Outputs
+      id: generate_outputs
+      if: steps.fetch_rss.outputs.has_content == 'true'
+      run: |
+        echo "Generating outputs..."
+        TODAY=$(date -u "+%Y-%m-%d")
+        
+        # Determine which file to use for output generation
+        if [ -n "${{ steps.ai_enhancement.outputs.enhanced_file }}" ] && [ -f "${{ steps.ai_enhancement.outputs.enhanced_file }}" ]; then
+          INPUT_FILE="${{ steps.ai_enhancement.outputs.enhanced_file }}"
+          echo "Using AI-enhanced file: $INPUT_FILE"
+        else
+          INPUT_FILE="data/${TODAY}.jsonl"
+          echo "Using raw RSS data file: $INPUT_FILE"
+        fi
+        
+        python generate_output.py --data "$INPUT_FILE" --date "$TODAY"
+        
+        echo "Output generation completed"
+    
+    - name: Prepare for commit
+      if: steps.fetch_rss.outputs.has_content == 'true'
+      run: |
+        echo "Preparing files for commit..."
+        
+        # Update file list for website
+        ls data/*.jsonl | sed 's|data/||' > data/file-list.txt
+        
+        # Create README for data branch
+        TODAY=$(date -u "+%Y-%m-%d")
+        echo "# Data Files - $TODAY" > data/README.md
+        echo "" >> data/README.md
+        echo "This branch contains generated data files for the Daily Research Tracker." >> data/README.md
+        echo "" >> data/README.md
+        echo "## Latest Files" >> data/README.md
+        echo "" >> data/README.md
+        ls -la data/*.jsonl | head -10 >> data/README.md
+    
+    - name: Commit and push to data branch
+      if: steps.fetch_rss.outputs.has_content == 'true'
+      run: |
+        echo "Committing to data branch..."
+        
+        # Configure git
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "GitHub Actions"
+        
+        # Create or checkout data branch
+        if git show-ref --quiet refs/heads/data; then
+          git checkout data
+          git pull origin data --no-edit || true
+        else
+          git checkout --orphan data
+          git rm -rf --cached . || true
+          echo "# Data Branch" > README.md
+          git add README.md
+          git commit -m "chore: initialize data branch"
+        fi
+        
+        # Clear everything except data directory
+        find . -maxdepth 1 ! -name '.' ! -name 'data' ! -name '.git' -exec rm -rf {} + 2>/dev/null || true
+        
+        # Copy data files (keep only data directory contents)
+        cp -r data/* . 2>/dev/null || true
+        rm -rf data
+        
+        # Add and commit
+        git add .
+        if ! git diff --staged --quiet; then
+          TODAY=$(date -u "+%Y-%m-%d")
+          git commit -m "data: update for $TODAY"
+          git push origin data
+          echo "Pushed to data branch"
+        else
+          echo "No changes to commit"
+        fi
+        
+        # Switch back to main for website update
+        git checkout main
+    
+    - name: Update website
+      if: steps.fetch_rss.outputs.has_content == 'true'
+      run: |
+        echo "Updating website..."
+        
+        # Configure git
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "GitHub Actions"
+        
+        # Check if website files exist
+        if [ -d "website" ]; then
+          # Copy website files to root for GitHub Pages
+          cp -r website/* . 2>/dev/null || true
+          
+          # Add and commit
+          git add .
+          if ! git diff --staged --quiet; then
+            TODAY=$(date -u "+%Y-%m-%d")
+            git commit -m "website: update for $TODAY"
+            git push origin main
+            echo "Pushed website update to main"
+          else
+            echo "No website changes to commit"
+          fi
+        else
+          echo "Warning: website directory not found"
+        fi
+    
+    - name: Summary
+      run: |
+        if [ "${{ steps.fetch_rss.outputs.has_content }}" = "true" ]; then
+          echo "✅ Workflow completed successfully"
+          echo "📊 Entries processed: ${{ steps.fetch_rss.outputs.entry_count }}"
+          echo "🌐 Website updated: ${{ steps.fetch_rss.outputs.has_content == 'true' && 'Yes' || 'No' }}"
+        else
+          echo "ℹ️ Workflow completed: No new content found"
+        fi

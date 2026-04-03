@@ -1,0 +1,31 @@
+[project]
+name = "daily-research-tracker"
+version = "0.1.0"
+description = "Automated RSS-based research paper tracking with AI semantic scoring"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"},
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "feedparser>=6.0.0",
+    "requests>=2.28.0",
+    "PyYAML>=6.0",
+    "langchain>=0.3.20",
+    "langchain-openai>=0.3.9",
+    "tqdm>=4.67.1",
+    "python-dateutil>=2.8.0",
+    "pydantic>=2.0.0",
+    "jinja2>=3.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=24.0.0",
+    "mypy>=1.0.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"

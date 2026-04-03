@@ -1,0 +1,43 @@
+# Configuration for Daily Research Tracker
+llm:
+  model_name: "deepseek-chat"
+  base_url: "https://api.deepseek.com"
+  temperature: 0.3
+  max_tokens: 1000
+
+scoring:
+  threshold: 6.0          # Minimum score to recommend (0-10)
+  fields: "research_directions.md"
+
+rss:
+  max_entries_per_feed: 50
+  timeout: 30
+  user_agent: "DailyResearchTracker/1.0"
+
+processing:
+  deduplication_key: "title+published"  # or "id"
+  language: "English"
+  timezone: "UTC"
+
+output:
+  website_dir: "website"
+  data_dir: "data"
+  obsidian_dir: "obsidian"
+  jsonl_format: "YYYY-MM-DD.jsonl"
+  markdown_format: "YYYY-MM-DD.md"
+
+github:
+  data_branch: "data"
+  main_branch: "main"
+
+aliyun:
+  enabled: false
+  oss_bucket: ""
+  oss_endpoint: ""
+  qdrant_url: ""
+  qdrant_collection: "papers"
+
+obsidian:
+  enabled: true
+  frontmatter: true
+  tags: true
