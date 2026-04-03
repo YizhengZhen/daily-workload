@@ -117,7 +117,25 @@ schedule:
   # "0 0 * * 1"   # 每周一UTC 00:00
 ```
 
-## 故障排除
+## 故障排除与最新修复
+
+### 🔧 最新修复 (2026-04-03)
+1. **AI Enhancement错误修复**: 修复了 `'NoneType' object has no attribute 'model_dump'` 错误
+   - 增强错误处理，检查LLM响应是否为None
+   - 修复在 `enhance.py` 第111行添加了空值检查
+
+2. **GitHub Actions权限修复**: 解决了403推送权限问题
+   - 使用 `GITHUB_TOKEN` 替代自定义 `TOKEN_GITHUB`
+   - 增强权限配置: `contents: write, pages: write, deployments: write`
+
+3. **网站数据加载修复**: 解决"Loading papers..."无限加载问题
+   - 创建了诊断脚本 `fix_website_loading.py`
+   - 添加了测试数据文件 `2026-04-03.json`
+   - 更新了 `index.json` 包含最新日期
+
+4. **新增工具**: 独立Markdown生成脚本
+   - `to_md.py`: 可在其他服务器上独立运行的JSONL转Markdown工具
+   - 支持配置其他Obsidian目录和自定义输出路径
 
 ### Python 相关问题
 **问题**: "Python was not found" 或类似错误
@@ -139,11 +157,12 @@ schedule:
 3. 尝试使用更稳定的RSS源
 
 ### AI 处理失败
-**问题**: API调用失败
+**问题**: API调用失败或 `'NoneType' object has no attribute 'model_dump'`
 **解决方案**:
 1. 验证API密钥是否正确
 2. 检查API服务状态 (DeepSeek等)
 3. 调整 `config.yaml` 中的模型参数
+4. 确保 `enhance.py` 已更新到最新版本（包含空值检查）
 
 ### GitHub Pages 不更新
 **问题**: 网站没有显示最新数据
@@ -151,6 +170,15 @@ schedule:
 1. 检查GitHub Actions执行日志
 2. 确认 `website/` 目录包含完整文件
 3. 等待GitHub Pages缓存刷新 (最多10分钟)
+4. 运行 `fix_website_loading.py` 诊断脚本
+
+### 网站无限加载 "Loading papers..."
+**问题**: 网站卡在加载状态
+**解决方案**:
+1. 检查浏览器控制台是否有JavaScript错误
+2. 确保 `website/data/index.json` 文件存在且包含有效数据
+3. 运行 `fix_website_loading.py` 创建测试数据
+4. 检查 `website/data/` 目录下的JSON文件是否可以访问
 
 ## 高级配置
 

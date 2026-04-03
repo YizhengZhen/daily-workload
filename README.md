@@ -28,8 +28,32 @@ A fully automated research paper tracking system that monitors arXiv and major j
 ├── .github/workflows/daily.yml    # GitHub Actions workflow
 ├── website/                       # Static site for GitHub Pages
 ├── data/                          # Generated JSONL & Markdown files
+├── obsidian/                      # Obsidian-compatible Markdown output
 └── README.md
 ```
+
+## 🛠️ Latest Fixes & New Features (2026-04-03)
+
+### 🔧 Critical Fixes
+1. **AI Enhancement Error**: Fixed `'NoneType' object has no attribute 'model_dump'` by adding null checks in `enhance.py`
+2. **GitHub Actions Permissions**: Resolved 403 push errors by using `GITHUB_TOKEN` with enhanced permissions
+3. **Website Loading Issue**: Fixed "Loading papers..." infinite loop by:
+   - Creating diagnostic script `fix_website_loading.py`
+   - Adding test data files
+   - Updating website data index
+
+### ✨ New Features
+1. **Standalone Markdown Generator**: `to_md.py` - independent script for converting JSONL to Obsidian Markdown on any server
+2. **Website Testing Tools**: 
+   - `test_website.py` - comprehensive website validation
+   - `fix_website_loading.py` - website diagnostics and repair
+3. **Enhanced Deployment Documentation**: Updated `DEPLOYMENT.md` with latest fixes and troubleshooting
+4. **Better Error Handling**: Improved error recovery in AI processing pipeline
+
+### 🚀 Quick Integration
+- **Obsidian Ready**: Automatically generates Markdown files with tags and frontmatter
+- **Multi-server Support**: `to_md.py` works independently for custom deployments
+- **Test Data**: Included sample data for immediate testing
 
 ## 🚀 Quick Start
 

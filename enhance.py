@@ -107,6 +107,12 @@ def process_single_item(chain, item: Dict, config: Dict) -> Dict:
             "abstract": abstract
         })
         
+        # Check if response is None
+        if response is None:
+            print(f"Warning: LLM returned None for {item.get('id', 'unknown')}", file=sys.stderr)
+            item['AI'] = default_analysis
+            return item
+        
         # Convert to dict
         analysis_dict = response.model_dump()
         
