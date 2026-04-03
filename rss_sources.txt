@@ -1,22 +1,17 @@
 # RSS feeds for arXiv and major journals
 # One URL per line
 # arXiv category-specific feeds
-http://export.arxiv.org/rss/cs.CL
-http://export.arxiv.org/rss/cs.CV
-http://export.arxiv.org/rss/cs.AI
-http://export.arxiv.org/rss/cs.LG
-http://export.arxiv.org/rss/cs.NE
-http://export.arxiv.org/rss/physics.comp-ph
+https://rss.arxiv.org/rss/quant-ph
 # Major journals (example feeds - may need updating)
 # APS Physical Review Letters
-https://journals.aps.org/rss/prl
+# https://journals.aps.org/rss/prl
 # Nature Physics
-https://www.nature.com/subjects/physics/nphys.rss
+# https://www.nature.com/subjects/physics/nphys.rss
 # Science Magazine
-http://www.sciencemag.org/rss/news_current.xml
+# http://www.sciencemag.org/rss/news_current.xml
 # Springer (example)
-https://link.springer.com/search.rss?facet-content-type=Article
+# https://link.springer.com/search.rss?facet-content-type=Article
 # IEEE (example)
-https://ieeexplore.ieee.org/rss/recentpubs.xml
+# https://ieeexplore.ieee.org/rss/recentpubs.xml
 # ACM (example)
-https://dl.acm.org/rss/feed_acmrecent
+# https://dl.acm.org/rss/feed_acmrecent
