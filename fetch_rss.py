@@ -10,6 +10,7 @@ import json
 import re
 import sys
 import time
+import os
 from datetime import datetime, timezone
 from dateutil import parser as date_parser
 from typing import List, Dict, Set
@@ -261,6 +262,9 @@ def main():
     today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
     data_dir = config.get('output', {}).get('data_dir', 'data')
     output_file = f"{data_dir}/{today}.jsonl"
+    
+    # Ensure data directory exists
+    os.makedirs(data_dir, exist_ok=True)
     
     # Write JSONL
     with open(output_file, 'w', encoding='utf-8') as f:
