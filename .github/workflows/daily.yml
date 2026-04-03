@@ -163,6 +163,8 @@ jobs:
           if ! git diff --staged --quiet; then
             TODAY=$(date -u "+%Y-%m-%d")
             git commit -m "data: update for $TODAY"
+            # git push origin data
+            git pull origin data --rebase
             git push origin data
             echo "Pushed to data branch"
           else
