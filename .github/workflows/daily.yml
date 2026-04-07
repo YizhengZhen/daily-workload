@@ -142,7 +142,9 @@ jobs:
           # Create or checkout data branch
           if git show-ref --quiet refs/heads/data; then
             git checkout data
-            git pull origin data --no-edit || true
+            # Instead of pulling with merge, reset to origin/data to avoid conflicts
+            git fetch origin data
+            git reset --hard origin/data
           else
             git checkout --orphan data
             git rm -rf --cached . || true
@@ -151,20 +153,32 @@ jobs:
             git commit -m "chore: initialize data branch"
           fi
 
-          # Clear everything except data directory
-          find . -maxdepth 1 ! -name '.' ! -name 'data' ! -name '.git' -exec rm -rf {} + 2>/dev/null || true
+          # Backup the data directory from main branch before cleaning
+          if [ -d "data" ]; then
+            echo "Backing up data directory..."
+            cp -r data /tmp/data_backup 2>/dev/null || true
+          fi
 
-          # Copy data files (keep only data directory contents)
-          cp -r data/* . 2>/dev/null || true
-          rm -rf data
+          # Clear everything except .git directory
+          find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} + 2>/dev/null || true
+
+          # Restore data files from backup
+          if [ -d "/tmp/data_backup" ]; then
+            echo "Restoring data files..."
+            cp -r /tmp/data_backup/* . 2>/dev/null || true
+            rm -rf /tmp/data_backup
+          fi
+
+          # Clean up any remaining data directory
+          rm -rf data 2>/dev/null || true
 
           # Add and commit
           git add .
           if ! git diff --staged --quiet; then
             TODAY=$(date -u "+%Y-%m-%d")
             git commit -m "data: update for $TODAY"
-            git push origin data
-            echo "Pushed to data branch"
+            git push --force-with-lease origin data
+            echo "Pushed to data branch (force with lease)"
           else
             echo "No changes to commit"
           fi
