@@ -1,13 +1,14 @@
 // Data loading utilities for Daily Research Tracker
 class DataLoader {
     constructor() {
-        this.baseUrl = window.location.origin + window.location.pathname;
+        this.baseUrl = '';
         this.dataCache = {};
     }
 
     async loadDateIndex() {
         try {
-            const response = await fetch(`${this.baseUrl}data/index.json`);
+            // Use relative path for GitHub Pages compatibility
+            const response = await fetch('data/index.json');
             if (!response.ok) throw new Error('Failed to load date index');
             return await response.json();
         } catch (error) {
@@ -23,7 +24,8 @@ class DataLoader {
         }
 
         try {
-            const response = await fetch(`${this.baseUrl}data/${date}.json`);
+            // Use relative path for GitHub Pages compatibility
+            const response = await fetch(`data/${date}.json`);
             if (!response.ok) throw new Error(`Failed to load data for ${date}`);
             const data = await response.json();
             this.dataCache[date] = data;
