@@ -177,15 +177,8 @@ jobs:
           if ! git diff --staged --quiet; then
             TODAY=$(date -u "+%Y-%m-%d")
             git commit -m "data: update for $TODAY"
-<<<<<<< HEAD
             git push --force-with-lease origin data
             echo "Pushed to data branch (force with lease)"
-=======
-            # git push origin data
-            git pull origin data --rebase
-            git push origin data
-            echo "Pushed to data branch"
->>>>>>> ed9fdb5b7f42bcc6d5ac8281e6edaed6bcd0c06b
           else
             echo "No changes to commit"
           fi
