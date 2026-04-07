@@ -119,7 +119,7 @@ schedule:
 
 ## 故障排除与最新修复
 
-### 🔧 最新修复 (2026-04-03)
+### 🔧 最新修复 (2026-04-03 至 2026-04-07)
 1. **AI Enhancement错误修复**: 修复了 `'NoneType' object has no attribute 'model_dump'` 错误
    - 增强错误处理，检查LLM响应是否为None
    - 修复在 `enhance.py` 第111行添加了空值检查
@@ -133,9 +133,48 @@ schedule:
    - 添加了测试数据文件 `2026-04-03.json`
    - 更新了 `index.json` 包含最新日期
 
-4. **新增工具**: 独立Markdown生成脚本
+4. **数据分支冲突修复** (2026-04-07): 解决了Git merge冲突问题
+   - **问题**: "CONFLICT (content): Merge conflict in README.md" 和 rebase错误
+   - **修复**:
+     - 使用 `git reset --hard origin/data` 替代 `git pull` 避免合并冲突
+     - 添加数据目录备份机制，确保数据文件正确恢复
+     - 使用 `--force-with-lease` 安全强制推送
+     - 移除冲突的merge标记和损坏的YAML语法
+   - **影响**: 数据分支现在可以稳定更新，无冲突错误
+
+5. **新增工具**: 独立Markdown生成脚本
    - `to_md.py`: 可在其他服务器上独立运行的JSONL转Markdown工具
    - 支持配置其他Obsidian目录和自定义输出路径
+
+### 🔧 GitHub Actions 数据分支冲突处理
+**问题**: 在"Commit and push to data branch"步骤出现merge冲突
+**解决方案**: 
+1. **避免合并冲突**: 使用 `git reset --hard origin/data` 而不是 `git pull`
+2. **数据备份**: 在清理工作区前备份数据目录到 `/tmp/data_backup`
+3. **安全推送**: 使用 `git push --force-with-lease` 而不是常规推送
+4. **正确的工作区清理**: 清除所有非.git文件，然后从备份恢复数据
+
+**修复后的工作流逻辑**:
+```bash
+# 1. 检出并重置到远程状态
+git checkout data
+git fetch origin data
+git reset --hard origin/data
+
+# 2. 备份数据文件
+cp -r data /tmp/data_backup
+
+# 3. 清理工作区（保留.git）
+find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+
+# 4. 恢复数据文件
+cp -r /tmp/data_backup/* .
+
+# 5. 提交并推送（强制但有安全限制）
+git add .
+git commit -m "data: update for $TODAY"
+git push --force-with-lease origin data
+```
 
 ### Python 相关问题
 **问题**: "Python was not found" 或类似错误

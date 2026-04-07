@@ -32,7 +32,7 @@ A fully automated research paper tracking system that monitors arXiv and major j
 └── README.md
 ```
 
-## 🛠️ Latest Fixes & New Features (2026-04-03)
+## 🛠️ Latest Fixes & New Features (2026-04-03 to 2026-04-07)
 
 ### 🔧 Critical Fixes
 1. **AI Enhancement Error**: Fixed `'NoneType' object has no attribute 'model_dump'` by adding null checks in `enhance.py`
@@ -41,6 +41,11 @@ A fully automated research paper tracking system that monitors arXiv and major j
    - Creating diagnostic script `fix_website_loading.py`
    - Adding test data files
    - Updating website data index
+4. **Data Branch Merge Conflicts** (2026-04-07): Fixed "CONFLICT (content): Merge conflict in README.md" errors by:
+   - Using `git reset --hard origin/data` instead of `git pull` to avoid merge conflicts
+   - Adding data directory backup mechanism
+   - Using safe force push with `--force-with-lease`
+   - Removing merge conflict markers and corrupted YAML syntax
 
 ### ✨ New Features
 1. **Standalone Markdown Generator**: `to_md.py` - independent script for converting JSONL to Obsidian Markdown on any server
@@ -54,6 +59,7 @@ A fully automated research paper tracking system that monitors arXiv and major j
 - **Obsidian Ready**: Automatically generates Markdown files with tags and frontmatter
 - **Multi-server Support**: `to_md.py` works independently for custom deployments
 - **Test Data**: Included sample data for immediate testing
+- **Stable Data Branch**: Data branch now updates without merge conflicts
 
 ## 🚀 Quick Start
 
